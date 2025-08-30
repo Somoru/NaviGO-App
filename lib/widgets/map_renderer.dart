@@ -8,6 +8,8 @@ class MapRenderer extends StatelessWidget {
   final String? destinationNodeId;
   final List<String>? pathNodeIds;
   final Function(String nodeId)? onNodeTap;
+  final bool showUserLocation;
+  final Offset? userLocation;
 
   const MapRenderer({
     super.key,
@@ -16,6 +18,8 @@ class MapRenderer extends StatelessWidget {
     this.destinationNodeId,
     this.pathNodeIds,
     this.onNodeTap,
+    this.showUserLocation = false,
+    this.userLocation,
   });
 
   @override
@@ -33,6 +37,8 @@ class MapRenderer extends StatelessWidget {
           selectedNodeId: selectedNodeId,
           destinationNodeId: destinationNodeId,
           pathNodeIds: pathNodeIds ?? [],
+          showUserLocation: showUserLocation,
+          userLocation: userLocation,
         ),
         child: GestureDetector(
           onTapDown: (details) {
@@ -71,12 +77,16 @@ class MapPainter extends CustomPainter {
   final String? selectedNodeId;
   final String? destinationNodeId;
   final List<String> pathNodeIds;
+  final bool showUserLocation;
+  final Offset? userLocation;
 
   MapPainter({
     required this.nodes,
     this.selectedNodeId,
     this.destinationNodeId,
     required this.pathNodeIds,
+    this.showUserLocation = false,
+    this.userLocation,
   });
 
   @override
@@ -89,6 +99,11 @@ class MapPainter extends CustomPainter {
 
     // Draw nodes
     _drawNodes(canvas);
+    
+    // Draw user location if enabled
+    if (showUserLocation && userLocation != null) {
+      _drawUserLocation(canvas, userLocation!);
+    }
   }
 
   void _drawConnections(Canvas canvas) {
@@ -236,10 +251,36 @@ class MapPainter extends CustomPainter {
     }
   }
 
+  // Draw user's current location as a pulsating blue dot
+  void _drawUserLocation(Canvas canvas, Offset position) {
+    // Outer glow
+    final Paint glowPaint = Paint()
+      ..color = Colors.blue.withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(position, 15, glowPaint);
+    
+    // Blue dot
+    final Paint dotPaint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(position, 8, dotPaint);
+    
+    // Inner highlight
+    final Paint highlightPaint = Paint()
+      ..color = Colors.white.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(position, 3, highlightPaint);
+    
+    // Direction indicator (would use actual heading in real app)
+    // This is just a placeholder for now
+  }
+
   @override
   bool shouldRepaint(MapPainter oldDelegate) {
     return oldDelegate.selectedNodeId != selectedNodeId ||
         oldDelegate.destinationNodeId != destinationNodeId ||
-        oldDelegate.pathNodeIds != pathNodeIds;
+        oldDelegate.pathNodeIds != pathNodeIds ||
+        oldDelegate.showUserLocation != showUserLocation ||
+        oldDelegate.userLocation != userLocation;
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/building.dart';
 import '../models/navigation.dart';
+import '../models/node.dart';
 import '../services/navigation_service.dart';
+import '../services/location_tracking_service.dart';
 
 class NavigationProvider extends ChangeNotifier {
   Building? _building;
@@ -10,6 +12,10 @@ class NavigationProvider extends ChangeNotifier {
   String? _destinationNodeId;
   NavigationRoute? _currentRoute;
   final NavigationService _navigationService = NavigationService();
+  final LocationTrackingService _locationService = LocationTrackingService();
+  
+  bool _isUsingAutoTracking = false;
+  bool _isTrackingInitialized = false;
 
   // Getters
   Building? get building => _building;
@@ -18,6 +24,9 @@ class NavigationProvider extends ChangeNotifier {
   String? get selectedNodeId => _selectedNodeId;
   String? get destinationNodeId => _destinationNodeId;
   NavigationRoute? get currentRoute => _currentRoute;
+  bool get isUsingAutoTracking => _isUsingAutoTracking;
+  bool get isTrackingInitialized => _isTrackingInitialized;
+  LocationTrackingService get locationService => _locationService;
   List<String> get pathNodeIdsOnCurrentFloor {
     if (_currentRoute == null || currentFloor == null) return [];
     if (_currentRoute!.pathNodeIds.isEmpty) return [];
@@ -35,6 +44,87 @@ class NavigationProvider extends ChangeNotifier {
     _destinationNodeId = null;
     _currentRoute = null;
     notifyListeners();
+  }
+  
+  // Initialize location tracking
+  Future<bool> initializeLocationTracking() async {
+    bool success = await _locationService.initialize();
+    if (success) {
+      _isTrackingInitialized = true;
+      
+      // Set up callback for position updates
+      _locationService.onPositionChanged = (position, floor) {
+        if (_isUsingAutoTracking) {
+          _handlePositionUpdate(position, floor);
+        }
+      };
+      
+      notifyListeners();
+    }
+    return success;
+  }
+  
+  // Toggle automatic position tracking
+  Future<bool> toggleAutoTracking() async {
+    if (!_isTrackingInitialized) {
+      bool initialized = await initializeLocationTracking();
+      if (!initialized) return false;
+    }
+    
+    _isUsingAutoTracking = !_isUsingAutoTracking;
+    
+    if (_isUsingAutoTracking) {
+      // Start tracking
+      _locationService.startTracking();
+      
+      // If we have a building and a selected node, use it for initial position
+      if (_building != null && _selectedNodeId != null) {
+        Node? node = _findNodeById(_selectedNodeId!);
+        if (node != null) {
+          _locationService.setInitialPosition(node.position, node.floor);
+          
+          // Update current floor to match
+          _setCurrentFloorByNumber(node.floor);
+        }
+      }
+    } else {
+      // Stop tracking
+      _locationService.stopTracking();
+    }
+    
+    notifyListeners();
+    return true;
+  }
+  
+  // Handle updates from location service
+  void _handlePositionUpdate(Offset position, int floor) {
+    // Update the current floor if needed
+    _setCurrentFloorByNumber(floor);
+    
+    // Find the closest node
+    String? nodeId = _locationService.findClosestNode(_building!);
+    if (nodeId != null && nodeId != _selectedNodeId) {
+      // Update selected node
+      _selectedNodeId = nodeId;
+      
+      // Recalculate route if destination is set
+      if (_destinationNodeId != null) {
+        calculateRoute();
+      }
+      
+      notifyListeners();
+    }
+  }
+  
+  // Set current floor by floor number instead of index
+  void _setCurrentFloorByNumber(int floorNumber) {
+    if (_building == null) return;
+    
+    int index = _building!.floors.indexWhere((floor) => floor.number == floorNumber);
+    if (index >= 0 && index != _currentFloorIndex) {
+      _currentFloorIndex = index;
+      notifyListeners();
+    }
   }
 
   void setCurrentFloorIndex(int index) {

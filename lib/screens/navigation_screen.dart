@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../services/navigation_provider.dart';
 import '../services/building_service.dart';
 import '../widgets/map_renderer.dart';
+import '../widgets/auto_tracking_switch.dart';
+import '../widgets/location_simulator.dart';
 import '../models/building.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
@@ -97,6 +99,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Widget _buildMapArea(
       NavigationProvider navigationProvider, Floor currentFloor) {
+    // Get user location if auto tracking is enabled and on current floor
+    Offset? userLocation;
+    final isUsingAutoTracking = navigationProvider.isUsingAutoTracking;
+    
+    if (isUsingAutoTracking) {
+      final locationService = navigationProvider.locationService;
+      if (locationService.currentFloor == currentFloor.number) {
+        userLocation = locationService.currentPosition;
+      }
+    }
+    
     return Expanded(
       child: Center(
         child: SingleChildScrollView(
@@ -111,6 +124,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 pathNodeIds: navigationProvider.pathNodeIdsOnCurrentFloor,
                 onNodeTap: (nodeId) =>
                     _handleNodeTap(navigationProvider, nodeId),
+                showUserLocation: isUsingAutoTracking,
+                userLocation: userLocation,
               ),
             ),
           ),
@@ -144,6 +159,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Auto-tracking switch
+          AutoTrackingSwitch(navigationProvider: navigationProvider),
+          const SizedBox(height: 12),
+          
           Row(
             children: [
               Expanded(
@@ -151,11 +170,13 @@ class _NavigationScreenState extends State<NavigationScreen> {
                   value: navigationProvider.selectedNodeId,
                   hint: 'Select start point',
                   nodes: allNodes,
-                  onChanged: (value) {
-                    if (value != null) {
-                      navigationProvider.selectNode(value);
-                    }
-                  },
+                  onChanged: navigationProvider.isUsingAutoTracking 
+                    ? null // Disable manual selection when auto-tracking is on
+                    : (value) {
+                        if (value != null) {
+                          navigationProvider.selectNode(value);
+                        }
+                      },
                 ),
               ),
               const SizedBox(width: 16),
@@ -185,6 +206,10 @@ class _NavigationScreenState extends State<NavigationScreen> {
             onPressed: () => navigationProvider.clearRoute(),
             child: const Text('Clear'),
           ),
+          
+          // Add location simulator for testing
+          const SizedBox(height: 8),
+          LocationSimulator(navigationProvider: navigationProvider),
         ],
       ),
     );
