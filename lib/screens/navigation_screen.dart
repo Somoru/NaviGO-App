@@ -5,6 +5,15 @@ import '../services/building_service.dart';
 import '../widgets/map_renderer.dart';
 import '../widgets/auto_tracking_switch.dart';
 import '../widgets/location_simulator.dart';
+import '../widgets/search_bar.dart';
+import '../models/building.dart';
+import 'package:dropdown_button2/dropdown_button2';ackage:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/navigation_provider.dart';
+import '../services/building_service.dart';
+import '../widgets/map_renderer.dart';
+import '../widgets/auto_tracking_switch.dart';
+import '../widgets/location_simulator.dart';
 import '../models/building.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
@@ -73,27 +82,39 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
   Widget _buildFloorSelector(
       NavigationProvider navigationProvider, Building building) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('Floor:', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(width: 8),
-          ...List.generate(building.floors.length, (index) {
-            final floor = building.floors[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: ChoiceChip(
-                label: Text(floor.name),
-                selected: navigationProvider.currentFloorIndex == index,
-                onSelected: (_) =>
-                    navigationProvider.setCurrentFloorIndex(index),
-              ),
-            );
-          }),
-        ],
-      ),
+    return Column(
+      children: [
+        // Add search bar above floor selector
+        DestinationSearchBar(
+          building: building,
+          currentFloor: navigationProvider.currentFloor!.number,
+          onDestinationSelected: (nodeId) {
+            navigationProvider.selectDestination(nodeId);
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Floor:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(width: 8),
+              ...List.generate(building.floors.length, (index) {
+                final floor = building.floors[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ChoiceChip(
+                    label: Text(floor.name),
+                    selected: navigationProvider.currentFloorIndex == index,
+                    onSelected: (_) =>
+                        navigationProvider.setCurrentFloorIndex(index),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

@@ -103,16 +103,29 @@ class NavigationProvider extends ChangeNotifier {
     
     // Find the closest node
     String? nodeId = _locationService.findClosestNode(_building!);
-    if (nodeId != null && nodeId != _selectedNodeId) {
-      // Update selected node
-      _selectedNodeId = nodeId;
+    if (nodeId != null) {
+      bool needsRecalculation = false;
       
-      // Recalculate route if destination is set
-      if (_destinationNodeId != null) {
-        calculateRoute();
+      // Check if user is off-route
+      if (_currentRoute != null && _destinationNodeId != null) {
+        // If current position is not on the route path, we should recalculate
+        if (!_currentRoute!.pathNodeIds.contains(nodeId)) {
+          // User has deviated from the path
+          needsRecalculation = true;
+        }
       }
       
-      notifyListeners();
+      if (nodeId != _selectedNodeId || needsRecalculation) {
+        // Update selected node
+        _selectedNodeId = nodeId;
+        
+        // Recalculate route if destination is set
+        if (_destinationNodeId != null) {
+          calculateRoute();
+        }
+        
+        notifyListeners();
+      }
     }
   }
   
