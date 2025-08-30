@@ -65,12 +65,12 @@ class LocationTrackingService {
     _isTracking = true;
     
     // Start listening to accelerometer
-    _accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
+    _accelerometerSubscription = accelerometerEventStream().listen((AccelerometerEvent event) {
       _processAccelerometerData(event);
     });
     
     // Start listening to gyroscope
-    _gyroscopeSubscription = gyroscopeEvents.listen((GyroscopeEvent event) {
+    _gyroscopeSubscription = gyroscopeEventStream().listen((GyroscopeEvent event) {
       _processGyroscopeData(event);
     });
     
@@ -141,8 +141,9 @@ class LocationTrackingService {
     );
     
     // Notify listeners
-    if (onPositionChanged != null) {
-      onPositionChanged!(_currentPosition, _currentFloor);
+    final callback = onPositionChanged;
+    if (callback != null) {
+      callback(_currentPosition, _currentFloor);
     }
   }
   
@@ -166,7 +167,9 @@ class LocationTrackingService {
     Node? closestNode;
     double closestDistance = double.infinity;
     
-    for (var node in floor!.nodes) {
+    // Since we've already handled the null case above, floor is non-null here
+    
+    for (var node in floor.nodes) {
       double distance = (node.position - _currentPosition).distance;
       if (distance < closestDistance) {
         closestDistance = distance;

@@ -14,10 +14,10 @@ class AutoTrackingSwitch extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
+        color: Color.fromRGBO(33, 150, 243, 0.1), // Light blue with 10% opacity
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.blue.withOpacity(0.3),
+          color: Color.fromRGBO(33, 150, 243, 0.3), // Light blue with 30% opacity
           width: 1,
         ),
       ),
@@ -50,10 +50,11 @@ class AutoTrackingSwitch extends StatelessWidget {
           const SizedBox(width: 8),
           Switch(
             value: navigationProvider.isUsingAutoTracking,
-            onChanged: (value) async {
+            onChanged: (value) {
               if (!navigationProvider.isTrackingInitialized && value) {
                 // Show a snackbar to indicate initialization is happening
-                ScaffoldMessenger.of(context).showSnackBar(
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                scaffoldMessenger.showSnackBar(
                   const SnackBar(
                     content: Text('Initializing sensors...'),
                     duration: Duration(seconds: 1),
@@ -61,17 +62,21 @@ class AutoTrackingSwitch extends StatelessWidget {
                 );
               }
               
-              final success = await navigationProvider.toggleAutoTracking();
+              // Handle the toggle without async/await
+              // Store the scaffold messenger to avoid context issues
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               
-              if (!success && value) {
-                // Show error message if we failed to enable tracking
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Failed to initialize sensors. Please check permissions.'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
+              navigationProvider.toggleAutoTracking().then((success) {
+                if (!success && value) {
+                  // Show error message if we failed to enable tracking
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to initialize sensors. Please check permissions.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              });
             },
             activeColor: Colors.blue,
           ),

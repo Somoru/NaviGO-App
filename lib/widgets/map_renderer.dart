@@ -119,8 +119,8 @@ class MapPainter extends CustomPainter {
       for (var entry in node.connections.entries) {
         String targetNodeId = entry.key;
         // Check if this connection has already been drawn
-        String connectionId = node.id + '-' + targetNodeId;
-        String reverseConnectionId = targetNodeId + '-' + node.id;
+        String connectionId = "$node.id-$targetNodeId";
+        String reverseConnectionId = "$targetNodeId-$node.id";
 
         if (drawnConnections.contains(connectionId) ||
             drawnConnections.contains(reverseConnectionId)) {
@@ -255,7 +255,7 @@ class MapPainter extends CustomPainter {
   void _drawUserLocation(Canvas canvas, Offset position) {
     // Outer glow
     final Paint glowPaint = Paint()
-      ..color = Colors.blue.withOpacity(0.3)
+      ..color = Color.fromRGBO(33, 150, 243, 0.3) // Light blue with 30% opacity
       ..style = PaintingStyle.fill;
     canvas.drawCircle(position, 15, glowPaint);
     
@@ -267,7 +267,7 @@ class MapPainter extends CustomPainter {
     
     // Inner highlight
     final Paint highlightPaint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
+      ..color = Color.fromRGBO(255, 255, 255, 0.6) // White with 60% opacity
       ..style = PaintingStyle.fill;
     canvas.drawCircle(position, 3, highlightPaint);
     
