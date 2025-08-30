@@ -15,8 +15,14 @@ NaviGO is a Flutter application for indoor navigation, similar to Google Maps bu
   - Rooms as nodes
   - Hallways as connections
   - Calculated path highlighted in red
+  - Current user position (with sensor tracking)
 - Step-by-step directions text
 - Support for multi-floor navigation
+- **Sensor-based tracking**:
+  - Accelerometer for step detection
+  - Gyroscope for heading/orientation
+  - Toggle between manual and automatic tracking
+  - Debug controls to simulate movement
 
 ## Future Enhancements
 
@@ -45,6 +51,9 @@ The app is built with a modular architecture to easily replace the mock map data
 - **Flutter SVG**: For vector graphics support
 - **Dropdown Button2**: Enhanced dropdown UI
 - **UUID**: For generating unique identifiers
+- **sensors_plus**: For accelerometer and gyroscope access
+- **permission_handler**: For Android sensor permissions
+- **vector_math**: For location calculations
 
 ## Getting Started
 
