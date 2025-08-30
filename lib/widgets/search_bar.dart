@@ -111,7 +111,7 @@ class _DestinationSearchBarState extends State<DestinationSearchBar> {
               borderRadius: BorderRadius.circular(8.0),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Color.fromRGBO(0, 0, 0, 0.1), // Black with 10% opacity
                   spreadRadius: 1,
                   blurRadius: 5,
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import '../services/navigation_provider.dart';
 import '../services/building_service.dart';
 import '../widgets/map_renderer.dart';
@@ -7,15 +8,6 @@ import '../widgets/auto_tracking_switch.dart';
 import '../widgets/location_simulator.dart';
 import '../widgets/search_bar.dart';
 import '../models/building.dart';
-import 'package:dropdown_button2/dropdown_button2';ackage:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/navigation_provider.dart';
-import '../services/building_service.dart';
-import '../widgets/map_renderer.dart';
-import '../widgets/auto_tracking_switch.dart';
-import '../widgets/location_simulator.dart';
-import '../models/building.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});

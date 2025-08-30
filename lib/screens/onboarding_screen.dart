@@ -123,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   shape: BoxShape.circle,
                   color: index == _currentPage
                       ? Theme.of(context).primaryColor
-                      : Colors.grey.withOpacity(0.5),
+                      : Color.fromRGBO(158, 158, 158, 0.5), // Grey with 50% opacity
                 ),
               );
             }),
